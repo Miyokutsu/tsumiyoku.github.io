@@ -1,0 +1,19 @@
+http:
+  routers:
+    api:
+      rule: "Host(`api.${DOMAIN}`)"
+      entryPoints: [ "websecure" ]
+      tls: { certResolver: "le" }
+      middlewares: [ "api-security" ]
+      service: api-split
+
+  services:
+    api-split:
+      weighted:
+        services:
+          - name: api-blue
+            weight: 100
+          - name: api-green
+            weight: 0
+    api-blue: { loadBalancer: { } }
+    api-green: { loadBalancer: { } }

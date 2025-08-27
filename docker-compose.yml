@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: tsumiyoku
+      POSTGRES_USER: state_user
+      POSTGRES_PASSWORD: state_pass
+    ports: [ "5432:5432" ]
+    volumes: [ "pgdata:/var/lib/postgresql/data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U state_user -d tsumiyoku" ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tsumiyoku
+      SPRING_DATASOURCE_USERNAME: state_user
+      SPRING_DATASOURCE_PASSWORD: state_pass
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: "8080"
+      MFA_TOTP_ENC_KEY: REPLACE_ME_BASE64_32B
+      DISCORD_CLIENT_ID: REPLACE_ME
+      DISCORD_CLIENT_SECRET: REPLACE_ME
+      AUDIT_HMAC_KEY: REPLACE_ME_BASE64_32B
+    ports: [ "8080:8080" ]
+
+volumes: { pgdata: { } }

@@ -1,0 +1,98 @@
+http:
+  routers:
+    api:
+      rule: "Host(`api.${DOMAIN}`)"
+      entryPoints: [ "websecure" ]
+      tls: { certResolver: "le" }
+      middlewares: [ "api-security" ]
+      service: api-split
+    canary-api:
+      rule: "Host(`canary.api.${DOMAIN}`)"
+      entryPoints: [ "websecure" ]
+      tls: { certResolver: "le" }
+      middlewares: [ "api-security","canary-forwardauth" ]
+      service: api-green
+
+    justice:
+      rule: "Host(`justice.${DOMAIN}`)"
+      entryPoints: [ "websecure" ]
+      tls: { certResolver: "le" }
+      middlewares: [ "inst-security" ]
+      service: justice-split
+    canary-justice:
+      rule: "Host(`canary.justice.${DOMAIN}`)"
+      entryPoints: [ "websecure" ]
+      tls: { certResolver: "le" }
+      middlewares: [ "inst-security","canary-forwardauth" ]
+      service: justice-green
+
+    finance:
+      rule: "Host(`finance.${DOMAIN}`)"
+      entryPoints: [ "websecure" ]
+      tls: { certResolver: "le" }
+      middlewares: [ "inst-security" ]
+      service: finance-split
+    canary-finance:
+      rule: "Host(`canary.finance.${DOMAIN}`)"
+      entryPoints: [ "websecure" ]
+      tls: { certResolver: "le" }
+      middlewares: [ "inst-security","canary-forwardauth" ]
+      service: finance-green
+
+    education:
+      rule: "Host(`education.${DOMAIN}`)"
+      entryPoints: [ "websecure" ]
+      tls: { certResolver: "le" }
+      middlewares: [ "inst-security" ]
+      service: education-split
+    canary-education:
+      rule: "Host(`canary.education.${DOMAIN}`)"
+      entryPoints: [ "websecure" ]
+      tls: { certResolver: "le" }
+      middlewares: [ "inst-security","canary-forwardauth" ]
+      service: education-green
+
+  services:
+    api-split: { weighted: { services: [ { name: api-blue, weight: 100 }, { name: api-green, weight: 0 } ] } }
+    justice-split: { weighted: { services: [ { name: justice-blue, weight: 100 }, { name: justice-green, weight: 0 } ] } }
+    finance-split: { weighted: { services: [ { name: finance-blue, weight: 100 }, { name: finance-green, weight: 0 } ] } }
+    education-split: { weighted: { services: [ { name: education-blue, weight: 100 }, { name: education-green, weight: 0 } ] } }
+
+    api-blue: { loadBalancer: { } }
+    api-green: { loadBalancer: { } }
+    justice-blue: { loadBalancer: { } }
+    justice-green: { loadBalancer: { } }
+    finance-blue: { loadBalancer: { } }
+    finance-green: { loadBalancer: { } }
+    education-blue: { loadBalancer: { } }
+    education-green: { loadBalancer: { } }
+
+  middlewares:
+    canary-forwardauth:
+      forwardAuth:
+        address: http://api-blue:8080/authz/canary
+        trustForwardHeader: true
+        authResponseHeaders: [ "X-User-Email", "X-Citizen-Id" ]
+
+    inst-security:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        frameDeny: true
+        contentTypeNoSniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        permissionsPolicy: "geolocation=(), microphone=(), camera=()"
+        customResponseHeaders:
+          Content-Security-Policy: >
+            default-src 'self';
+            script-src 'self';
+            style-src 'self';
+            img-src 'self' data:;
+            font-src 'self';
+            connect-src 'self' https://api.${DOMAIN};
+            object-src 'none';
+            base-uri 'self';
+            frame-ancestors 'none';
+            upgrade-insecure-requests;

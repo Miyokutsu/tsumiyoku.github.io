@@ -1,0 +1,16 @@
+ROOT = "/mnt/data/fictional-state"
+APP = os.path.join(ROOT, "app")
+RES_TEMPL = os.path.join(APP, "src", "main", "resources", "templates")
+RES = os.path.join(APP, "src", "main", "resources")
+JAVA = os.path.join(APP, "src", "main", "java")
+PKG_BASE = os.path.join(JAVA, "com", "state")
+PKG_SECURITY = os.path.join(PKG_BASE, "security")
+PKG_ADMIN = os.path.join(PKG_BASE, "admin")
+PKG_AUDIT = os.path.join(PKG_BASE, "audit")
+PKG_AUDIT_DB = os.path.join(PKG_AUDIT, "db")
+PKG_ID = os.path.join(PKG_BASE, "identity")
+PKG_USER = os.path.join(PKG_BASE, "user")
+PKG_CRYPTO = os.path.join(PKG_BASE, "crypto")
+
+TRAEFIK = os.path.join(ROOT, "traefik-dynamic")
+GHWF = os.path.join(ROOT, ".github", "workflows")

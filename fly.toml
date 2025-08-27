@@ -1,0 +1,14 @@
+app = "tsumiyoku-app"
+primary_region = "cdg"
+[env]
+SPRING_PROFILES_ACTIVE = "prod"
+SERVER_PORT = "8080"
+[[services]]
+protocol = "tcp"
+internal_port = 8080
+[[services.ports]]
+port = 80
+handlers = ["http"]
+[[services.ports]]
+port = 443
+handlers = ["tls", "http"]

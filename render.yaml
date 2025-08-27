@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: tsumiyoku-app
+    plan: free
+    env: image
+    image:
+      url: ghcr.io/<owner>/tsumiyoku-app:main
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SERVER_PORT
+        value: "8080"
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: tsumiyoku-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: tsumiyoku-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: tsumiyoku-db
+          property: password
+      - key: MFA_TOTP_ENC_KEY
+        sync: false
+    runtime: docker
+databases:
+  - name: tsumiyoku-db
+    plan: free
+    databaseName: fictional_state
+    user: state_user
