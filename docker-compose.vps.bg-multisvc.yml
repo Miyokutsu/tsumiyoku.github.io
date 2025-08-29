@@ -21,45 +21,45 @@ services:
     networks: [ web ]
 
   api-blue:
-    image: ghcr.io/${GHCR_OWNER}/fictional-state-api:${API_BLUE_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-api:${API_BLUE_TAG}
     env_file: [ ".env" ]
     labels: [ "traefik.enable=true", "traefik.http.services.api-blue.loadbalancer.server.port=8080" ]
     networks: [ web ]
   api-green:
-    image: ghcr.io/${GHCR_OWNER}/fictional-state-api:${API_GREEN_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-api:${API_GREEN_TAG}
     env_file: [ ".env" ]
     labels: [ "traefik.enable=true", "traefik.http.services.api-green.loadbalancer.server.port=8080" ]
     networks: [ web ]
 
   justice-blue:
-    image: ghcr.io/${GHCR_OWNER}/fictional-justice:${JUSTICE_BLUE_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-justice:${JUSTICE_BLUE_TAG}
     env_file: [ ".env" ]
     labels: [ "traefik.enable=true", "traefik.http.services.justice-blue.loadbalancer.server.port=8080" ]
     networks: [ web ]
   justice-green:
-    image: ghcr.io/${GHCR_OWNER}/fictional-justice:${JUSTICE_GREEN_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-justice:${JUSTICE_GREEN_TAG}
     env_file: [ ".env" ]
     labels: [ "traefik.enable=true", "traefik.http.services.justice-green.loadbalancer.server.port=8080" ]
     networks: [ web ]
 
   finance-blue:
-    image: ghcr.io/${GHCR_OWNER}/fictional-finance:${FINANCE_BLUE_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-finance:${FINANCE_BLUE_TAG}
     env_file: [ ".env" ]
     labels: [ "traefik.enable=true", "traefik.http.services.finance-blue.loadbalancer.server.port=8080" ]
     networks: [ web ]
   finance-green:
-    image: ghcr.io/${GHCR_OWNER}/fictional-finance:${FINANCE_GREEN_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-finance:${FINANCE_GREEN_TAG}
     env_file: [ ".env" ]
     labels: [ "traefik.enable=true", "traefik.http.services.finance-green.loadbalancer.server.port=8080" ]
     networks: [ web ]
 
   education-blue:
-    image: ghcr.io/${GHCR_OWNER}/fictional-education:${EDU_BLUE_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-education:${EDU_BLUE_TAG}
     env_file: [ ".env" ]
     labels: [ "traefik.enable=true", "traefik.http.services.education-blue.loadbalancer.server.port=8080" ]
     networks: [ web ]
   education-green:
-    image: ghcr.io/${GHCR_OWNER}/fictional-education:${EDU_GREEN_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-education:${EDU_GREEN_TAG}
     env_file: [ ".env" ]
     labels: [ "traefik.enable=true", "traefik.http.services.education-green.loadbalancer.server.port=8080" ]
     networks: [ web ]

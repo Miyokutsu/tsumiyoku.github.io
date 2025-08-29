@@ -1,54 +1,60 @@
 package org.tsumiyoku.gov.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
 @Configuration
-@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final RateLimitFilter rateLimitFilter;
+    private final StrictOriginFilter strictOriginFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     SecurityFilterChain chain(HttpSecurity http) throws Exception {
+        http.addFilterBefore(rateLimitFilter, org.springframework.security.web.csrf.CsrfFilter.class);
+        http.addFilterBefore(strictOriginFilter, org.springframework.security.web.csrf.CsrfFilter.class);
+
         http
-                .cors(c -> c.configurationSource(_ -> {
-                    var cfg = new CorsConfiguration();
-                    // Adapte le domaine de ton front si séparé
-                    cfg.setAllowedOrigins(List.of("https://gov.tsumiyoku.org", "http://localhost:5173"));
-                    cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-                    cfg.setAllowedHeaders(List.of("Content-Type","X-XSRF-TOKEN"));
-                    cfg.setAllowCredentials(true);
-                    return cfg;
-                }))
-                .csrf(csrf -> csrf
-                        // Cookie CSRF lisible par le front (pas sensible)
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                )
+                .cors(c -> {
+                })
+                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .headers(h -> h
-                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
-                )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/auth/csrf").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/vc/verify").permitAll()
-                        .requestMatchers("/vote/**").authenticated()
+                        .requestMatchers("/auth/**", "/login/**", "/oauth2/**", "/authz/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults()); // peut rester activé pour tests API
+                .oauth2Login(o -> o
+                        .userInfoEndpoint(ui -> ui.userService(customOAuth2UserService))
+                        .successHandler(new org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler())
+                )
+                .httpBasic(Customizer.withDefaults());
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsSource() {
+        var cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(List.of("https://www.localhost", "https://api.localhost", "http://localhost:8080"));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        cfg.setAllowedHeaders(List.of("Content-Type", "X-XSRF-TOKEN", "Authorization"));
+        cfg.setAllowCredentials(true);
+        var src = new UrlBasedCorsConfigurationSource();
+        src.registerCorsConfiguration("/**", cfg);
+        return src;
     }
 }

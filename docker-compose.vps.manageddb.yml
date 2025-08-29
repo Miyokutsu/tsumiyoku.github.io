@@ -21,7 +21,7 @@ services:
     networks: [ web ]
 
   app:
-    image: ghcr.io/<owner>/fictional-state-app:${APP_TAG:-main}
+    image: ghcr.io/<owner>/tsumiyoku-app:${APP_TAG:-main}
     env_file: [ ".env" ]
     labels:
       - "traefik.enable=true"

@@ -21,7 +21,7 @@ services:
     networks: [ web ]
 
   api-blue:
-    image: ghcr.io/${GHCR_OWNER}/fictional-state-api:${BLUE_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-api:${BLUE_TAG}
     env_file: [ ".env" ]
     labels:
       - "traefik.enable=true"
@@ -29,7 +29,7 @@ services:
     networks: [ web ]
 
   api-green:
-    image: ghcr.io/${GHCR_OWNER}/fictional-state-api:${GREEN_TAG}
+    image: ghcr.io/${GHCR_OWNER}/tsumiyoku-api:${GREEN_TAG}
     env_file: [ ".env" ]
     labels:
       - "traefik.enable=true"

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <title>Admin approvals</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 2rem;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: .5rem
+        }
+
+        th {
+            background: #f5f5f5
+        }
+
+        form {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+            margin: 1rem 0
+        }
+
+        input, select {
+            padding: .4rem
+        }
+
+        .pill {
+            padding: .2rem .5rem;
+            border-radius: 999px;
+            background: #eef;
+            margin-right: .25rem
+        }
+    </style>
+</head>
+<body>
+<h1>Admin approvals</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Citizen</th>
+        <th>Roles</th>
+        <th>Expires</th>
+        <th>Approved by</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="a : ${items}">
+        <td th:text="${a.citizenId}"></td>
+        <td><span th:each="r : ${a.roles}" th:text="${r}" class="pill"></span></td>
+        <td th:text="${a.expiresAt} ?: '-'"></td>
+        <td th:text="${a.approvedBy}"></td>
+        <td>
+            <button onclick="revoke(this.closest('tr').children[0].innerText)">Revoke</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<h2>Ajouter / Mettre à jour</h2>
+<form onsubmit="return upsert()">
+    <label for="cid"></label><input id="cid" placeholder="citizen UUID" required style="min-width:24ch"/>
+    <label for="roles"></label><select id="roles" multiple size="3">
+    <option>OWNER</option>
+    <option selected>ADMIN</option>
+</select>
+    <label for="exp"></label><input id="exp" type="datetime-local"/>
+    <button type="submit">Save</button>
+</form>
+<script>
+    async function upsert() {
+        const cid = document.getElementById('cid').value.trim();
+        const roles = Array.from(document.getElementById('roles').selectedOptions).map(o => o.value);
+        const exp = document.getElementById('exp').value ? new Date(document.getElementById('exp').value).toISOString() : null;
+        const r = await fetch('/admin/approvals', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({citizenId: cid, roles, expiresAt: exp})
+        });
+        if (!r.ok) {
+            alert('Erreur ' + r.status);
+            return false;
+        }
+        location.reload();
+        return false;
+    }
+
+    async function revoke(cid) {
+        if (!confirm('Révoquer ?')) return;
+        const r = await fetch('/admin/approvals/' + cid, {method: 'DELETE'});
+        if (!r.ok) {
+            alert('Erreur ' + r.status);
+            return;
+        }
+        location.reload();
+    }
+</script>
+</body>
+</html>

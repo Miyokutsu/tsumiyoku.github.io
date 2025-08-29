@@ -1,9 +1,8 @@
-// src/main/java/com/state/identity/VerifiableCredential.java
 package org.tsumiyoku.gov.identity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.tsumiyoku.gov.auth.Citizen;
+import org.tsumiyoku.gov.user.Citizen;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -17,36 +16,20 @@ import java.util.UUID;
 @Builder
 public class VerifiableCredential {
     @Id
-    @Column(columnDefinition = "BINARY(16)")
+    @GeneratedValue
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "subject_id", nullable = false)
     private Citizen subject;
 
-    @Column(nullable = false)
-    private String type;   // "CitizenCredential" | "ResidentVerified" | ...
-
-    @Column(nullable = false)
-    private String status; // ACTIVE | REVOKED
-
-    @Column(nullable = false)
+    private String type;
+    private String status;
     private Instant issuedAt;
-
     private Instant revokedAt;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(name = "payload_json", columnDefinition = "text")
     private String payloadJson;
 
-    @Lob
-    @Column(nullable = false)
     private String proofJws;
-
-    @PrePersist
-    void pre() {
-        if (id == null) id = UUID.randomUUID();
-        if (issuedAt == null) issuedAt = Instant.now();
-        if (status == null) status = "ACTIVE";
-    }
 }
