@@ -2,6 +2,8 @@ package org.tsumiyoku.gov.user;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -18,8 +20,11 @@ public class Citizen {
     @GeneratedValue
     private UUID id;
 
-    @Column(unique = true, nullable = false)
+    @JdbcTypeCode(SqlTypes.OTHER)
+    @Column(name = "email", columnDefinition = "citext", nullable = false, unique = true)
     private String email;
+
+    @Column(unique = true, nullable = false)
     private String externalId;
     private String displayName;
     private String status;

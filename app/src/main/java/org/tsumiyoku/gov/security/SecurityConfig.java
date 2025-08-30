@@ -8,6 +8,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -34,22 +35,32 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/login/**", "/oauth2/**", "/authz/**").permitAll()
+                        .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/auth/**", "/login/**", "/oauth2/**", "/login/oauth2/**", "/authz/**", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(o -> o
                         .userInfoEndpoint(ui -> ui.userService(customOAuth2UserService))
-                        .successHandler(new org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler())
+                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler())
+                        .loginPage("/oauth2/authorization/discord")   // login unique Discord pour l’instant
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/error")
                 )
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults())
+                .logout(lo -> lo.logoutUrl("/logout").logoutSuccessUrl("/")
+                        .invalidateHttpSession(true).deleteCookies("JSESSIONID"));
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsSource() {
         var cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("https://www.localhost", "https://api.localhost", "http://localhost:8080"));
+        cfg.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "https://*.localhost",
+                "https://*.tsumiyoku.org"
+        ));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         cfg.setAllowedHeaders(List.of("Content-Type", "X-XSRF-TOKEN", "Authorization"));
         cfg.setAllowCredentials(true);

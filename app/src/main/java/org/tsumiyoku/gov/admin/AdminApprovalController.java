@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+import org.tsumiyoku.gov.audit.AuditService;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin/approvals")
+@RequestMapping(value = "/api/admin/approvals", produces = "application/json")
 @RequiredArgsConstructor
 public class AdminApprovalController {
     private final AdminApprovalService service;

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/app/src/main/resources/db/migration/V1__baseline.sql" value="103afeda-b6b9-443c-8ad0-3583654cb92e" />
+    <file url="file://$PROJECT_DIR$/app/src/main/resources/db/migration/V4__admin_approval.sql" value="103afeda-b6b9-443c-8ad0-3583654cb92e" />
+    <file url="file://$PROJECT_DIR$/app/src/main/resources/db/migration/V5__audit_indexes.sql" value="103afeda-b6b9-443c-8ad0-3583654cb92e" />
+  </component>
+</project>

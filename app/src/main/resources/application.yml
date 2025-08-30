@@ -4,7 +4,7 @@ server:
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/fictional_state}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/tsumiyoku}
     username: ${SPRING_DATASOURCE_USERNAME:state_user}
     password: ${SPRING_DATASOURCE_PASSWORD:state_pass}
   jpa:
@@ -22,8 +22,9 @@ spring:
           discord:
             client-id: ${DISCORD_CLIENT_ID}
             client-secret: ${DISCORD_CLIENT_SECRET}
-            scope: identify email
+            scope: identify,email
             authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_basic
             redirect-uri: "{baseUrl}/login/oauth2/code/discord"
             client-name: Discord
         provider:

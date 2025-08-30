@@ -2,7 +2,6 @@ services:
   - type: web
     name: tsumiyoku-app
     plan: free
-    env: image
     image:
       url: ghcr.io/<owner>/tsumiyoku-app:main
     envVars:
@@ -28,5 +27,5 @@ services:
 databases:
   - name: tsumiyoku-db
     plan: free
-    databaseName: fictional_state
+    databaseName: tsumiyoku
     user: state_user

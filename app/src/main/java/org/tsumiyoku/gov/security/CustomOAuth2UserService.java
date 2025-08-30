@@ -28,33 +28,38 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final AdminApprovalRepo approvalRepo;
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest req) throws OAuth2AuthenticationException {
-        var delegate = new DefaultOAuth2UserService();
-        var u = delegate.loadUser(req);
+    public OAuth2User loadUser(OAuth2UserRequest req) {
+        try {
+            var delegate = new DefaultOAuth2UserService();
+            var u = delegate.loadUser(req);
 
-        String email = (String) u.getAttributes().get("email");
-        if (email == null) throw new OAuth2AuthenticationException("Email scope is required");
+            String email = (String) u.getAttributes().get("email");
+            if (email == null) throw new OAuth2AuthenticationException("Email scope is required");
 
-        var citizen = citizenRepo.findByEmail(email)
-                .orElseThrow(() -> new OAuth2AuthenticationException("No citizen for " + email));
+            var citizen = citizenRepo.findByEmail(email)
+                    .orElseThrow(() -> new OAuth2AuthenticationException("No citizen for " + email));
 
-        var as = assuranceRepo.findById(citizen.getId()).orElse(null);
-        boolean ial2 = as != null && as.getIal() >= 2;
-        boolean aal2 = as != null && as.getAal() >= 2;
-        boolean hasVC = vcRepo.existsBySubject_IdAndTypeAndStatus(citizen.getId(), "CitizenCredential", "ACTIVE");
+            var as = assuranceRepo.findById(citizen.getId()).orElse(null);
+            boolean ial2 = as != null && as.getIal() >= 2;
+            boolean aal2 = as != null && as.getAal() >= 2;
+            boolean hasVC = vcRepo.existsBySubject_IdAndTypeAndStatus(citizen.getId(), "CitizenCredential", "ACTIVE");
 
-        var appr = approvalRepo.findById(citizen.getId()).orElse(null);
-        List<GrantedAuthority> roles = new ArrayList<>();
-        roles.add(new SimpleGrantedAuthority("ROLE_USER"));
-        if (appr != null && (appr.getExpiresAt() == null || appr.getExpiresAt().isAfter(Instant.now()))) {
-            var list = Arrays.asList(appr.getRoles());
-            if (list.contains("OWNER")) roles.add(new SimpleGrantedAuthority("ROLE_OWNER"));
-            if (ial2 && aal2 && hasVC && list.contains("ADMIN")) roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            var appr = approvalRepo.findById(citizen.getId()).orElse(null);
+            List<GrantedAuthority> roles = new ArrayList<>();
+            roles.add(new SimpleGrantedAuthority("ROLE_USER"));
+            if (appr != null && (appr.getExpiresAt() == null || appr.getExpiresAt().isAfter(Instant.now()))) {
+                var list = Arrays.asList(appr.getRoles());
+                if (list.contains("OWNER")) roles.add(new SimpleGrantedAuthority("ROLE_OWNER"));
+                if (ial2 && aal2 && hasVC && list.contains("ADMIN")) roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            }
+
+            Map<String, Object> attrs = new HashMap<>();
+            attrs.put("email", email);
+            attrs.put("citizenId", citizen.getId().toString());
+            return new DefaultOAuth2User(roles, attrs, "email");
+        } catch (OAuth2AuthenticationException e) {
+            System.err.println("OAuth2AuthenticationException: " + e.getMessage());
+            return null;
         }
-
-        Map<String, Object> attrs = new HashMap<>();
-        attrs.put("email", email);
-        attrs.put("citizenId", citizen.getId().toString());
-        return new DefaultOAuth2User(roles, attrs, "email");
     }
 }

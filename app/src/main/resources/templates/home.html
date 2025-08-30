@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Accueil (dynamique)</title></head>
+<body>
+<h1>Accueil</h1>
+<p th:if="${email != null}">Connecté en tant que <b th:text="${email}"></b> (citizenId: <code
+        th:text="${citizenId}"></code>)</p>
+<p th:if="${email == null}">Non connecté. <a href="/oauth2/authorization/discord">Se connecter</a></p>
+<p><a href="/">Aller au portail</a></p>
+</body>
+</html>

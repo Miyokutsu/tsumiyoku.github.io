@@ -1,0 +1,196 @@
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Tsumiyoku — Portail citoyen</title>
+    <style>
+        :root {
+            --bg: #0b1020;
+            --card: #121a35;
+            --fg: #eaf0ff;
+            --muted: #aab5d6;
+            --acc: #6ea8fe;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html, body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, #0b1020, #090f1f 35%, #0e1630);
+            color: var(--fg);
+            font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif
+        }
+
+        .wrap {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0 24px
+        }
+
+        header .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: radial-gradient(circle at 30% 30%, #7fb0ff, #3a64c6)
+        }
+
+        h1 {
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: .3px
+        }
+
+        p.muted {
+            color: var(--muted)
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .25)
+        }
+
+        .card h3 {
+            margin: 0 0 6px
+        }
+
+        .btn {
+            appearance: none;
+            border: 1px solid rgba(255, 255, 255, .1);
+            background: #15224a;
+            color: var(--fg);
+            padding: 10px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        .btn:hover {
+            border-color: rgba(255, 255, 255, .25)
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        code {
+            background: #0b132b;
+            border: 1px solid rgba(255, 255, 255, .08);
+            padding: 2px 6px;
+            border-radius: 6px
+        }
+
+        footer {
+            margin: 28px 0 12px;
+            color: var(--muted);
+            font-size: .9rem
+        }
+
+        .ok {
+            color: #6ee7a8
+        }
+
+        .err {
+            color: #ff8b8b
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <div class="logo"></div>
+        <div>
+            <h1>Tsumiyoku — Portail citoyen</h1>
+            <p class="muted">Bienvenue. Connecte-toi, active la MFA et commence/consultes tes démarches d'identité.</p>
+        </div>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Connexion</h3>
+            <p class="muted">Utilise Discord pour te connecter rapidement.</p>
+            <div class="row">
+                <a class="btn" href="/oauth2/authorization/discord">Se connecter via Discord</a>
+                <form id="logoutForm" method="post" action="/logout" onsubmit="injectCsrf(event)">
+                    <input type="hidden" name="_csrf" id="logoutCsrf">
+                    <button class="btn" type="submit">Se déconnecter</button>
+                </form>
+            </div>
+            <p class="muted">Ou créer un compte email/mot de passe :</p>
+            <a class="btn" href="/auth/register">Créer un compte citoyen</a>
+        </div>
+
+        <div class="card">
+            <h3>Sécurité</h3>
+            <p class="muted">Active l'authentification à deux facteurs (TOTP).</p>
+            <a class="btn" href="/mfa/enroll">Activer MFA (TOTP)</a>
+        </div>
+
+        <div class="card">
+            <h3>Mes démarches d'identité</h3>
+            <p class="muted">Crée une nouvelle demande (carte d'identité, association ou naturalisation) et joins des
+                pièces.</p>
+            <div class="row">
+                <a class="btn" href="/identity/self/new">Nouvelle demande</a>
+                <a class="btn" href="/identity/self/applications">Voir mes demandes</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Administration (OWNER/ADMIN)</h3>
+            <div class="row">
+                <a class="btn" href="/admin/approvals">Approbations admin</a>
+                <a class="btn" href="/admin/identity">Revue identité</a>
+                <a class="btn" href="/admin/audit/verify">Vérifier l'audit</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <span id="health">Ping...</span>
+    </footer>
+</div>
+
+<script>
+    function getCookie(name) {
+        return document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1];
+    }
+
+    function injectCsrf(e) {
+        const t = getCookie('XSRF-TOKEN');
+        if (t) document.getElementById('logoutCsrf').value = decodeURIComponent(t);
+    }
+
+    // small health ping
+    fetch('/actuator/health').then(r => r.json()).then(d => {
+        const ok = d.status === 'UP';
+        document.getElementById('health').innerHTML = ok ? 'Santé API: <span class="ok">UP</span>' : 'Santé API: <span class="err">DOWN</span>';
+    }).catch(_ => {
+        document.getElementById('health').textContent = 'Santé API: indisponible';
+    });
+</script>
+</body>
+</html>

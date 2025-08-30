@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.tsumiyoku.gov.admin.AdminApprovalRepo;
+import org.tsumiyoku.gov.audit.AuditService;
 import org.tsumiyoku.gov.identity.AssuranceRepo;
 import org.tsumiyoku.gov.identity.VCRepo;
 

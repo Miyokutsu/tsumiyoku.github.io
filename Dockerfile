@@ -1,18 +1,14 @@
-# --- Build stage (Maven) ---
-FROM eclipse-temurin:21-jdk AS build
-WORKDIR /app
-COPY app/pom.xml app/pom.xml
-RUN --mount=type=cache,target=/root/.m2 mvn -f app/pom.xml -q -DskipTests dependency:go-offline
-COPY app /app
-RUN --mount=type=cache,target=/root/.m2 mvn -f app/pom.xml -q -DskipTests package
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /build
+COPY app .
+RUN mvn clean package -DskipTests
+RUN echo "Verifying JAR contents:" && jar tvf target/*.jar | grep -i application
 
-# --- Run stage ---
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
+COPY --from=build /build/target/*.jar app.jar
 ENV TZ=UTC \
-    JAVA_OPTS="-XX:+UseG1GC -XX:MaxRAMPercentage=75 -Dfile.encoding=UTF-8" \
-    SERVER_PORT=8080
+    JAVA_OPTS="-XX:+UseG1GC -XX:MaxRAMPercentage=75 -Dfile.encoding=UTF-8"
 EXPOSE 8080
-COPY --from=build /app/target/app-*.jar /app/app.jar
-HEALTHCHECK --interval=30s --timeout=3s --start-period=30s CMD bash -lc "</dev/tcp/127.0.0.1/${SERVER_PORT}" || exit 1
-ENTRYPOINT ["bash","-lc","java $JAVA_OPTS -jar /app/app.jar"]
+# Run with explicit main class
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.main.banner-mode=off"]

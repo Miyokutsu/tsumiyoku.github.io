@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <java.version>23</java.version>
+        <java.version>21</java.version>  <!-- Change from 23 to 21 -->
     </properties>
 
     <dependencies>
@@ -50,6 +50,12 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+            <version>10.20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <version>10.20.0</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -82,7 +88,18 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+            <configuration>
+                <mainClass>org.tsumiyoku.gov.Application</mainClass>
+                <layout>JAR</layout>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
 </project>

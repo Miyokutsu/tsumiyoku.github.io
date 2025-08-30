@@ -1,22 +1,9 @@
-CREATE TABLE IF NOT EXISTS admin_approval
+create table if not exists admin_approval
 (
-    citizen_id
-                UUID
-        PRIMARY
-            KEY
-        REFERENCES
-            citizen
-                (
-                 id
-                    ) ON DELETE CASCADE,
-    approved_by UUID NOT NULL REFERENCES citizen
-        (
-         id
-            ),
-    roles       TEXT[]      NOT NULL DEFAULT ARRAY ['ADMIN'],
-    expires_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now
-        (
-        )
+    citizen_id  UUID primary key references citizen (id) on delete cascade,
+    approved_by UUID        not null references citizen (id),
+    roles       TEXT[]      not null default array ['ADMIN'],
+    expires_at  TIMESTAMPTZ,
+    created_at  TIMESTAMPTZ not null default now()
 );
-CREATE INDEX IF NOT EXISTS idx_admin_approval_roles ON admin_approval USING GIN (roles);
+create index if not exists idx_admin_approval_roles on admin_approval using GIN (roles);

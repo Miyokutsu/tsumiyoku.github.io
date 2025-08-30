@@ -2,6 +2,8 @@ package org.tsumiyoku.gov.identity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.tsumiyoku.gov.user.Citizen;
 
 import java.time.Instant;
@@ -28,7 +30,8 @@ public class VerifiableCredential {
     private Instant issuedAt;
     private Instant revokedAt;
 
-    @Column(name = "payload_json", columnDefinition = "text")
+    @Column(name = "payload_json", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String payloadJson;
 
     private String proofJws;
